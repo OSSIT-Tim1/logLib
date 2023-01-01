@@ -56,7 +56,7 @@ func WriteLog(event *Event) {
 	}
 }
 
-func SaveLog(msg string, logs []string) ([] string, error){
+func SaveLog(msg string, logs []string) ([]string, error) {
 
 	logger := logrus.New()
 	sliceWriter := &SliceWriter{
@@ -80,7 +80,7 @@ func SaveLog(msg string, logs []string) ([] string, error){
 
 	if len(sliceWriter.logs) > 2 {
 		fmt.Println("Veci je od 2")
-		res, err := flushLogs(logger, logs)
+		res, err := flushLogs(logger, sliceWriter.logs)
 		if err != nil {
 			return sliceWriter.logs, err
 		}
@@ -109,6 +109,6 @@ func flushLogs(logger *logrus.Logger, logs []string) ([]string, error) {
 			return logs, err
 		}
 	}
-	
-	return []string {}, nil
+
+	return []string{}, nil
 }
