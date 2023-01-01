@@ -5,9 +5,9 @@ import (
 	"os"
 	"time"
 
+	"github.com/google/uuid"
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
 	"github.com/sirupsen/logrus"
-	// log "github.com/sirupsen/logrus"
 )
 
 // datum i vreme
@@ -56,7 +56,9 @@ func WriteLog(event *Event) {
 	}
 }
 
-func SaveLog(msg string, logs []string) ([]string, error) {
+const maxMemory = 1024 * 1024 // boundary of 1MB for logfile
+
+func SaveLog(msg string, logs []string, logType string, sourceType, sourceName, ip string) ([]string, error) {
 
 	logger := logrus.New()
 	sliceWriter := &SliceWriter{
@@ -69,24 +71,38 @@ func SaveLog(msg string, logs []string) ([]string, error) {
 		TimestampFormat: time.RFC822,
 		FullTimestamp:   true,
 	}
+	id, err := uuid.NewUUID()
+	if err != nil {
+		fmt.Println(err)
+		return sliceWriter.logs, err
+	}
 	standardFields := logrus.Fields{
-		"Log id":      "1",
-		"Source":      "source test",
-		"Source name": "source name test",
-		"Sender ip":   "source ip test",
+		"Log id":      id,
+		"Source type": sourceType,
+		"Source name": sourceName,
+		"Sender ip":   ip,
 	}
 	// rotateLog()
-	logger.WithFields(standardFields).Info(msg)
 
-	if len(sliceWriter.logs) > 2 {
-		fmt.Println("Veci je od 2")
+	switch logType {
+	case ERROR:
+		logger.WithFields(standardFields).Error(msg)
+	case WARNING:
+		logger.WithFields(standardFields).Warning(msg)
+	case SUCCESS:
+		logger.WithFields(standardFields).Info(msg)
+	case INFO:
+		logger.WithFields(standardFields).Info(msg)
+	default:
+		logger.WithFields(standardFields).Info(msg)
+	}
+
+	if len(sliceWriter.logs) > 2 { // 2 should be replaced with maxMemory
 		res, err := flushLogs(logger, sliceWriter.logs)
 		if err != nil {
 			return sliceWriter.logs, err
 		}
 		sliceWriter.logs = res
-	} else {
-		fmt.Println("Nije veci od 2")
 	}
 	return sliceWriter.logs, nil
 }
@@ -100,9 +116,7 @@ func flushLogs(logger *logrus.Logger, logs []string) ([]string, error) {
 	defer file.Close()
 
 	// Write the logs to the file
-	fmt.Println("Pocetak pisanja sa bufferom")
-	for br, log := range logs {
-		fmt.Println("U for petlji: ", br, log)
+	for _, log := range logs {
 		_, err = file.Write([]byte(log))
 		if err != nil {
 			fmt.Println(err)

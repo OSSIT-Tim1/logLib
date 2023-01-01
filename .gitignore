@@ -135,5 +135,8 @@ fabric.properties
 /keys/
 
 /logs
+./logs
+/logs/
+logs/
 
 /logfile
