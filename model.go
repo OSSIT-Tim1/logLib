@@ -20,3 +20,12 @@ type Event struct {
 	EventType  string
 	Message    string
 }
+
+type SliceWriter struct {
+	logs []string
+}
+
+func (sw *SliceWriter) Write(p []byte) (int, error) {
+	sw.logs = append(sw.logs, string(p))
+	return len(p), nil
+}

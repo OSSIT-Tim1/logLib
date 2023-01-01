@@ -1,10 +1,13 @@
 package loglib
 
 import (
+	"fmt"
+	"os"
 	"time"
 
 	rotatelogs "github.com/lestrrat-go/file-rotatelogs"
-	log "github.com/sirupsen/logrus"
+	"github.com/sirupsen/logrus"
+	// log "github.com/sirupsen/logrus"
 )
 
 // datum i vreme
@@ -21,15 +24,15 @@ func rotateLog() {
 		rotatelogs.WithRotationTime(time.Minute), //24*time.Hour
 	)
 	if err != nil {
-		log.Fatal(err)
+		logrus.Fatal(err)
 	}
 
 	// Use the rotatelogs object as the io.Writer for the log package.
-	log.SetOutput(rl)
+	logrus.SetOutput(rl)
 }
 
 func WriteLog(event *Event) {
-	standardFields := log.Fields{
+	standardFields := logrus.Fields{
 		"Log id":      event.Id,
 		"Source":      event.SourceType,
 		"Source name": event.SourceName,
@@ -38,16 +41,74 @@ func WriteLog(event *Event) {
 	}
 	rotateLog()
 	// log.WithFields(standardFields).WithFields(log.Fields{"string": "foo", "int": 1, "float": 1.1}).Info(invalidArgument)
+	fmt.Println("LOGLIB IZ HELPERA")
 	switch event.EventType {
 	case ERROR:
-		log.WithFields(standardFields).Error(event.Message)
+		logrus.WithFields(standardFields).Error(event.Message)
 	case WARNING:
-		log.WithFields(standardFields).Warning(event.Message)
+		logrus.WithFields(standardFields).Warning(event.Message)
 	case SUCCESS:
-		log.WithFields(standardFields).Info(event.Message)
+		logrus.WithFields(standardFields).Info(event.Message)
 	case INFO:
-		log.WithFields(standardFields).Info(event.Message)
+		logrus.WithFields(standardFields).Info(event.Message)
 	default:
-		log.WithFields(standardFields).Info("EVENT TYPE ERROR")
+		logrus.WithFields(standardFields).Info("EVENT TYPE ERROR")
 	}
+}
+
+func SaveLog(msg string, logs []string) ([] string, error){
+
+	logger := logrus.New()
+	sliceWriter := &SliceWriter{
+		logs: logs,
+	}
+	logger.Out = sliceWriter
+	// Set the log level to debug.
+	logger.SetLevel(logrus.DebugLevel)
+	logger.Formatter = &logrus.TextFormatter{
+		TimestampFormat: time.RFC822,
+		FullTimestamp:   true,
+	}
+	standardFields := logrus.Fields{
+		"Log id":      "1",
+		"Source":      "source test",
+		"Source name": "source name test",
+		"Sender ip":   "source ip test",
+	}
+	// rotateLog()
+	logger.WithFields(standardFields).Info(msg)
+
+	if len(sliceWriter.logs) > 2 {
+		fmt.Println("Veci je od 2")
+		res, err := flushLogs(logger, logs)
+		if err != nil {
+			return sliceWriter.logs, err
+		}
+		sliceWriter.logs = res
+	} else {
+		fmt.Println("Nije veci od 2")
+	}
+	return sliceWriter.logs, nil
+}
+
+func flushLogs(logger *logrus.Logger, logs []string) ([]string, error) {
+
+	file, err := os.OpenFile("/data/log/logfile.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		logger.Fatalf("Failed to open log file: %v", err)
+	}
+	defer file.Close()
+
+	// Write the logs to the file
+	fmt.Println("Pocetak pisanja sa bufferom")
+	for br, log := range logs {
+		fmt.Println("U for petlji: ", br, log)
+		_, err = file.Write([]byte(log))
+		if err != nil {
+			fmt.Println(err)
+			return logs, err
+		}
+	}
+	
+	return []string {}, nil
 }
