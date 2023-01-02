@@ -3,6 +3,7 @@ package loglib
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"time"
 
 	"github.com/google/uuid"
@@ -16,19 +17,50 @@ import (
 // id dogadjaja
 // poruka - detaljniji opis za logovanje
 
-func rotateLog() {
+func extractDateFromLog(log string) (string, error) {
+	// Extract the date and time string from the given string
+	re := regexp.MustCompile(`time="(.+)" level`)
+	dateTimeString := re.FindStringSubmatch(log)[1]
+
+	// Parse the date and time string using the time.RFC822 layout
+	t, err := time.Parse(time.RFC822, dateTimeString)
+	if err != nil {
+		fmt.Println(err)
+		return "", err
+	}
+	formatted := t.Format("200601231941")
+
+	// Print the formatted date and time
+	return formatted, nil
+}
+
+func rotateLog(log string) error {
+	date, err := extractDateFromLog(log)
+	if err != nil {
+		fmt.Println(err)
+	}
+
 	rl, err := rotatelogs.New(
-		"logs/logfile.%Y%m%d%H%M", // for daily rotation we would set "logfile.%Y%m%d"
+		// "logs/logfile.%Y%m%d%H%M", // for daily rotation we would set "logfile.%Y%m%d"
+		// fmt.Sprintf("logs/logfile.%s", date), // for daily rotation we would set "logfile.%Y%m%d"
+		fmt.Sprintf("/data/log/logfile.%s", date),
 		rotatelogs.WithLinkName("logfile"),
 		rotatelogs.WithMaxAge(24*time.Hour),      // 7*24*time.Hour
 		rotatelogs.WithRotationTime(time.Minute), //24*time.Hour
 	)
 	if err != nil {
-		logrus.Fatal(err)
+		fmt.Println(err)
+		return err
 	}
-
+	//write in file
+	_, err = rl.Write([]byte(log))
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
 	// Use the rotatelogs object as the io.Writer for the log package.
-	logrus.SetOutput(rl)
+	// logrus.SetOutput(rl)
+	return nil
 }
 
 // func WriteLog(event *Event) {
@@ -116,13 +148,19 @@ func flushLogs(logger *logrus.Logger, logs []string) ([]string, error) {
 	defer file.Close()
 
 	// Write the logs to the file
+	newLogs := make([]string, 0, len(logs))
 	for _, log := range logs {
-		_, err = file.Write([]byte(log))
+		err := rotateLog(log)
 		if err != nil {
-			fmt.Println(err)
-			return logs, err
+			fmt.Println("Error during rotation log: ", err)
+			newLogs = append(newLogs, log)
 		}
+		// _, err = file.Write([]byte(log))
+		// if err != nil {
+		// 	fmt.Println(err)
+		// 	return logs, err
+		// }
 	}
 
-	return []string{}, nil
+	return newLogs, nil
 }
