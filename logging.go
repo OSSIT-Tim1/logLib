@@ -1,10 +1,10 @@
 package loglib
 
-var WrongCredentialsMsg = "User with username {} trying to sign in with wrong credentials"
-var MultipleAttemptSignInMsg = "User with username {} trying to sign in more then {} times with wrong credentials"
-var SuccessfulSignIn = "User with username {} has successfully logged in"
+var WrongCredentialsMsg = "User with username %s trying to sign in with wrong credentials"
+var MultipleAttemptSignInMsg = "User with username %s trying to sign in more then %d times with wrong credentials"
+var SuccessfulSignIn = "User with username %s has successfully logged in"
 
-func GenerateLog(msg string, logs []string, logType string, sourceType, sourceName, ip string) ([]string, error) {
+func GenerateLog(msg string, logs []string, logType, sourceType, sourceName, ip string) ([]string, error) {
 	event := Event{
 		SourceType: sourceType,
 		SourceName: sourceName,
