@@ -44,7 +44,7 @@ func rotateLog(log string) error {
 		// "logs/logfile.%Y%m%d%H%M", // for daily rotation we would set "logfile.%Y%m%d"
 		// fmt.Sprintf("logs/logfile.%s", date), // for daily rotation we would set "logfile.%Y%m%d"
 		fmt.Sprintf("/data/log/logfile.%s", date),
-		rotatelogs.WithLinkName("logfile"),
+		rotatelogs.WithLinkName("/data/log/logfile"),
 		rotatelogs.WithMaxAge(24*time.Hour),      // 7*24*time.Hour
 		rotatelogs.WithRotationTime(time.Minute), //24*time.Hour
 	)
