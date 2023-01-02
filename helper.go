@@ -31,34 +31,34 @@ func rotateLog() {
 	logrus.SetOutput(rl)
 }
 
-func WriteLog(event *Event) {
-	standardFields := logrus.Fields{
-		"Log id":      event.Id,
-		"Source":      event.SourceType,
-		"Source name": event.SourceName,
-		"Sender ip":   event.Ip,
-		"Event type":  event.EventType,
-	}
-	rotateLog()
-	// log.WithFields(standardFields).WithFields(log.Fields{"string": "foo", "int": 1, "float": 1.1}).Info(invalidArgument)
-	fmt.Println("LOGLIB IZ HELPERA")
-	switch event.EventType {
-	case ERROR:
-		logrus.WithFields(standardFields).Error(event.Message)
-	case WARNING:
-		logrus.WithFields(standardFields).Warning(event.Message)
-	case SUCCESS:
-		logrus.WithFields(standardFields).Info(event.Message)
-	case INFO:
-		logrus.WithFields(standardFields).Info(event.Message)
-	default:
-		logrus.WithFields(standardFields).Info("EVENT TYPE ERROR")
-	}
-}
+// func WriteLog(event *Event) {
+// 	standardFields := logrus.Fields{
+// 		"Log id":      event.Id,
+// 		"Source":      event.SourceType,
+// 		"Source name": event.SourceName,
+// 		"Sender ip":   event.Ip,
+// 		"Event type":  event.EventType,
+// 	}
+// 	rotateLog()
+// 	// log.WithFields(standardFields).WithFields(log.Fields{"string": "foo", "int": 1, "float": 1.1}).Info(invalidArgument)
+// 	fmt.Println("LOGLIB IZ HELPERA")
+// 	switch event.EventType {
+// 	case ERROR:
+// 		logrus.WithFields(standardFields).Error(event.Message)
+// 	case WARNING:
+// 		logrus.WithFields(standardFields).Warning(event.Message)
+// 	case SUCCESS:
+// 		logrus.WithFields(standardFields).Info(event.Message)
+// 	case INFO:
+// 		logrus.WithFields(standardFields).Info(event.Message)
+// 	default:
+// 		logrus.WithFields(standardFields).Info("EVENT TYPE ERROR")
+// 	}
+// }
 
 const maxMemory = 1024 * 1024 // boundary of 1MB for logfile
 
-func SaveLog(msg string, logs []string, logType string, sourceType, sourceName, ip string) ([]string, error) {
+func saveLog(logs []string, event *Event) ([]string, error) {
 
 	logger := logrus.New()
 	sliceWriter := &SliceWriter{
@@ -78,23 +78,23 @@ func SaveLog(msg string, logs []string, logType string, sourceType, sourceName, 
 	}
 	standardFields := logrus.Fields{
 		"Log id":      id,
-		"Source type": sourceType,
-		"Source name": sourceName,
-		"Sender ip":   ip,
+		"Source name": event.SourceName,
+		"Source type": event.SourceType,
+		"Sender ip":   event.Ip,
 	}
 	// rotateLog()
 
-	switch logType {
+	switch event.EventType {
 	case ERROR:
-		logger.WithFields(standardFields).Error(msg)
+		logger.WithFields(standardFields).Error(event.Message)
 	case WARNING:
-		logger.WithFields(standardFields).Warning(msg)
+		logger.WithFields(standardFields).Warning(event.Message)
 	case SUCCESS:
-		logger.WithFields(standardFields).Info(msg)
+		logger.WithFields(standardFields).Info(event.Message)
 	case INFO:
-		logger.WithFields(standardFields).Info(msg)
+		logger.WithFields(standardFields).Info(event.Message)
 	default:
-		logger.WithFields(standardFields).Info(msg)
+		logger.WithFields(standardFields).Info(event.Message)
 	}
 
 	if len(sliceWriter.logs) > 2 { // 2 should be replaced with maxMemory

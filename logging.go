@@ -1,49 +1,86 @@
 package loglib
 
-func GenerateErrorLog(id, srcType, srcNname, ip, message string) {
+var WrongCredentialsMsg = "User with username {} trying to sign in with wrong credentials"
+var MultipleAttemptSignInMsg = "User with username {} trying to sign in more then {} times with wrong credentials"
+var SuccessfulSignIn = "User with username {} has successfully logged in"
+
+func GenerateLog(msg string, logs []string, logType string, sourceType, sourceName, ip string) ([]string, error) {
+	event := Event{
+		SourceType: sourceType,
+		SourceName: sourceName,
+		Ip:         ip,
+		EventType:  logType,
+		Message:    msg,
+	}
+
+	res, err := saveLog(logs,&event)
+	if err != nil {
+		return res, err
+	}
+	return res, nil
+}
+
+func GenerateErrorLog(msg string, logs []string, sourceType, sourceName, ip string) ([]string, error) {
 
 	event := Event{
-		Id:         id,
-		SourceType: srcType,
-		SourceName: srcNname,
+		SourceType: sourceType,
+		SourceName: sourceName,
 		Ip:         ip,
 		EventType:  ERROR,
-		Message:    message,
+		Message:    msg,
 	}
-	WriteLog(&event)
+	res, err := saveLog(logs,&event)
+	if err != nil {
+		return res, err
+	}
+	return res, nil
 
 }
 
-func GenerateWarningLog(id, srcType, srcNname, ip, message string) {
+func GenerateWarningLog(msg string, logs []string, sourceType, sourceName, ip string) ([]string, error) {
+
 	event := Event{
-		Id:         id,
-		SourceType: srcType,
-		SourceName: srcNname,
+		SourceType: sourceType,
+		SourceName: sourceName,
 		Ip:         ip,
 		EventType:  WARNING,
-		Message:    message,
+		Message:    msg,
 	}
-	WriteLog(&event)
+	res, err := saveLog(logs,&event)
+	if err != nil {
+		return res, err
+	}
+	return res, nil
 }
-func GenerateSuccessLog(id, srcType, srcNname, ip, message string) {
+
+func GenerateSuccessLog(msg string, logs []string, sourceType, sourceName, ip string) ([]string, error) {
+
 	event := Event{
-		Id:         id,
-		SourceType: srcType,
-		SourceName: srcNname,
+		SourceType: sourceType,
+		SourceName: sourceName,
 		Ip:         ip,
 		EventType:  SUCCESS,
-		Message:    message,
+		Message:    msg,
 	}
-	WriteLog(&event)
+	res, err := saveLog(logs,&event)
+	if err != nil {
+		return res, err
+	}
+	return res, nil
 }
-func GenerateInfoLog(id, srcType, srcNname, ip, message string) {
+
+func GenerateInfoLog(msg string, logs []string, sourceType, sourceName, ip string) ([]string, error) {
+
 	event := Event{
-		Id:         id,
-		SourceType: srcType,
-		SourceName: srcNname,
+		SourceType: sourceType,
+		SourceName: sourceName,
 		Ip:         ip,
 		EventType:  INFO,
-		Message:    message,
+		Message:    msg,
 	}
-	WriteLog(&event)
+	res, err := saveLog(logs,&event)
+	if err != nil {
+		return res, err
+	}
+	return res, nil
 }
