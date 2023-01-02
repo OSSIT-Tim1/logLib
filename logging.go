@@ -13,7 +13,7 @@ func GenerateLog(msg string, logs []string, logType, sourceType, sourceName, ip 
 		Message:    msg,
 	}
 
-	res, err := saveLog(logs,&event)
+	res, err := saveLog(logs, &event)
 	if err != nil {
 		return res, err
 	}
@@ -29,7 +29,7 @@ func GenerateErrorLog(msg string, logs []string, sourceType, sourceName, ip stri
 		EventType:  ERROR,
 		Message:    msg,
 	}
-	res, err := saveLog(logs,&event)
+	res, err := saveLog(logs, &event)
 	if err != nil {
 		return res, err
 	}
@@ -46,7 +46,7 @@ func GenerateWarningLog(msg string, logs []string, sourceType, sourceName, ip st
 		EventType:  WARNING,
 		Message:    msg,
 	}
-	res, err := saveLog(logs,&event)
+	res, err := saveLog(logs, &event)
 	if err != nil {
 		return res, err
 	}
@@ -62,7 +62,7 @@ func GenerateSuccessLog(msg string, logs []string, sourceType, sourceName, ip st
 		EventType:  SUCCESS,
 		Message:    msg,
 	}
-	res, err := saveLog(logs,&event)
+	res, err := saveLog(logs, &event)
 	if err != nil {
 		return res, err
 	}
@@ -78,7 +78,7 @@ func GenerateInfoLog(msg string, logs []string, sourceType, sourceName, ip strin
 		EventType:  INFO,
 		Message:    msg,
 	}
-	res, err := saveLog(logs,&event)
+	res, err := saveLog(logs, &event)
 	if err != nil {
 		return res, err
 	}
