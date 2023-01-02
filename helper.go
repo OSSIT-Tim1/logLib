@@ -2,7 +2,6 @@ package loglib
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"time"
 
@@ -28,7 +27,7 @@ func extractDateFromLog(log string) (string, error) {
 		fmt.Println(err)
 		return "", err
 	}
-	formatted := t.Format("200601231941")
+	formatted := t.Format("200601021504")
 
 	// Print the formatted date and time
 	return formatted, nil
@@ -44,7 +43,7 @@ func rotateLog(log string) error {
 		// "logs/logfile.%Y%m%d%H%M", // for daily rotation we would set "logfile.%Y%m%d"
 		// fmt.Sprintf("logs/logfile.%s", date), // for daily rotation we would set "logfile.%Y%m%d"
 		fmt.Sprintf("/data/log/logfile.%s", date),
-		rotatelogs.WithLinkName("/data/log/logfile"),
+		// rotatelogs.WithLinkName("/data/log/logfile"),
 		rotatelogs.WithMaxAge(24*time.Hour),      // 7*24*time.Hour
 		rotatelogs.WithRotationTime(time.Minute), //24*time.Hour
 	)
@@ -141,12 +140,6 @@ func saveLog(logs []string, event *Event) ([]string, error) {
 
 func flushLogs(logger *logrus.Logger, logs []string) ([]string, error) {
 
-	file, err := os.OpenFile("/data/log/logfile.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-	if err != nil {
-		logger.Fatalf("Failed to open log file: %v", err)
-	}
-	defer file.Close()
-
 	// Write the logs to the file
 	newLogs := make([]string, 0, len(logs))
 	for _, log := range logs {
@@ -155,11 +148,7 @@ func flushLogs(logger *logrus.Logger, logs []string) ([]string, error) {
 			fmt.Println("Error during rotation log: ", err)
 			newLogs = append(newLogs, log)
 		}
-		// _, err = file.Write([]byte(log))
-		// if err != nil {
-		// 	fmt.Println(err)
-		// 	return logs, err
-		// }
+
 	}
 
 	return newLogs, nil
