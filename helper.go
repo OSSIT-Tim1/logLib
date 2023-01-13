@@ -92,7 +92,7 @@ func rotateLog(log string) error {
 
 	rl, err := rotatelogs.New(
 		fmt.Sprintf("/data/log/logfile.%s", date), //for daily rotation we would set "logfile.%Y%m%d"
-		rotatelogs.WithMaxAge(24*time.Hour),       // 7*24*time.Hour
+		rotatelogs.WithMaxAge(5*time.Minute),       // 7*24*time.Hour
 		rotatelogs.WithRotationTime(time.Minute),  //24*time.Hour
 	)
 	if err != nil {
