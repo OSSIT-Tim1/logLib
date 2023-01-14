@@ -2,6 +2,7 @@ package loglib
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"time"
 
@@ -11,6 +12,9 @@ import (
 )
 
 // const maxMemory = 1024 * 1024 // boundary of 1MB for logfile
+const folderPath = "/data/log/"
+const maxAge = 5
+
 
 /*
 The saveLog function takes two parameters (forwarded logs and Event object with parameters)
@@ -18,7 +22,13 @@ When new log was created, it is inserted into existing logs. If logs are above a
 logs would be written down to local logfile depending on the time when log was created.
 If logs are under boundary, they are going to be returned with new inserted log.
 */
+
 func saveLog(logs []string, event *Event) ([]string, error) {
+
+	err := checkOutOfDateFiles()
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 
 	logger := logrus.New()
 	sliceWriter := &SliceWriter{
@@ -89,12 +99,10 @@ func rotateLog(log string) error {
 	if err != nil {
 		return err
 	}
-	linkName := fmt.Sprintf("/data/log/logfile.%s", date) //for daily rotation we would set "logfile.%Y%m%d"
+
 	rl, err := rotatelogs.New(
-		// fmt.Sprintf("/data/log/logfile.%s", date), //for daily rotation we would set "logfile.%Y%m%d"
-		linkName,
-		rotatelogs.WithLinkName(linkName),
-		rotatelogs.WithMaxAge(5*time.Minute),       // 7*24*time.Hour
+		fmt.Sprintf("%slogfile.%s", folderPath, date), //for daily rotation we would set "logfile.%Y%m%d"
+		rotatelogs.WithMaxAge(maxAge*time.Minute),      // 7*24*time.Hour
 		rotatelogs.WithRotationTime(time.Minute),  //24*time.Hour
 	)
 	if err != nil {
@@ -124,3 +132,45 @@ func extractDateFromLog(log string) (string, error) {
 	// Print the formatted date and time
 	return formatted, nil
 }
+
+func checkOutOfDateFiles()  error {
+
+	currentTime := time.Now()
+
+	files, err := os.Open(folderPath)
+	if err != nil {
+		return err
+	}
+	defer files.Close()
+
+	fileInfos, err := files.Readdir(-1)
+	if err != nil {
+		return err
+	}
+
+	for _, fileInfo := range fileInfos {
+		if !fileInfo.IsDir() {
+
+			if currentTime.Sub(fileInfo.ModTime()).Minutes() > maxAge {
+				err := deleteFile(fileInfo.Name())
+				if err != nil{
+					fmt.Println(err.Error())
+				}
+			}
+
+		}
+	}
+
+	return nil
+}
+
+func deleteFile(filePath string) error{
+	err := os.Remove(fmt.Sprintf("/data/log/%s",filePath))
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+	return nil
+
+}
+	
