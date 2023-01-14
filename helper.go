@@ -15,7 +15,6 @@ import (
 const folderPath = "/data/log/"
 const maxAge = 5
 
-
 /*
 The saveLog function takes two parameters (forwarded logs and Event object with parameters)
 When new log was created, it is inserted into existing logs. If logs are above agreed boundary,
@@ -25,7 +24,9 @@ If logs are under boundary, they are going to be returned with new inserted log.
 
 func saveLog(logs []string, event *Event) ([]string, error) {
 
-	err := checkOutOfDateFiles()
+	ch := make(chan error)
+	go func() { ch <- checkOutOfDateFiles() }()
+	err := <-ch
 	if err != nil {
 		fmt.Println(err.Error())
 	}
@@ -91,7 +92,7 @@ func flushLogs(logger *logrus.Logger, logs []string) ([]string, error) {
 }
 
 /*
-Tge rotateLog function is used for creating new and update existing log files
+The rotateLog function is used for creating new and update existing log files
 which differ in our case by the minutes of creation (should be the day of creation).
 */
 func rotateLog(log string) error {
@@ -102,8 +103,8 @@ func rotateLog(log string) error {
 
 	rl, err := rotatelogs.New(
 		fmt.Sprintf("%slogfile.%s", folderPath, date), //for daily rotation we would set "logfile.%Y%m%d"
-		rotatelogs.WithMaxAge(maxAge*time.Minute),      // 7*24*time.Hour
-		rotatelogs.WithRotationTime(time.Minute),  //24*time.Hour
+		rotatelogs.WithMaxAge(maxAge*time.Minute),     // 7*24*time.Hour
+		rotatelogs.WithRotationTime(time.Minute),      //24*time.Hour
 	)
 	if err != nil {
 		return err
@@ -133,7 +134,8 @@ func extractDateFromLog(log string) (string, error) {
 	return formatted, nil
 }
 
-func checkOutOfDateFiles()  error {
+// The function is used to delete files that are older then the specified time
+func checkOutOfDateFiles() error {
 
 	currentTime := time.Now()
 
@@ -153,7 +155,7 @@ func checkOutOfDateFiles()  error {
 
 			if currentTime.Sub(fileInfo.ModTime()).Minutes() > maxAge {
 				err := deleteFile(fileInfo.Name())
-				if err != nil{
+				if err != nil {
 					fmt.Println(err.Error())
 				}
 			}
@@ -164,8 +166,8 @@ func checkOutOfDateFiles()  error {
 	return nil
 }
 
-func deleteFile(filePath string) error{
-	err := os.Remove(fmt.Sprintf("/data/log/%s",filePath))
+func deleteFile(filePath string) error {
+	err := os.Remove(fmt.Sprintf("/data/log/%s", filePath))
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -173,4 +175,3 @@ func deleteFile(filePath string) error{
 	return nil
 
 }
-	
