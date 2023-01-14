@@ -7,7 +7,7 @@ const (
 	INFO    = "Info"
 
 	SERVICE      = "Service"
-	USER_ACCOUNT = "Username"
+	USER_ACCOUNT = "User"
 	COMPONENT    = "Component"
 )
 
