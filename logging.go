@@ -10,6 +10,9 @@ var EmailSent = "A new mail has been created for %s and sent to %s address"
 var SuccessfulSignIn = "User with username %s has successfully logged in"
 var InvalidJSON = "Invalid JSON format sent"
 var DataDoesntExist = "Required data doesn't exist"
+var SocialGraphSendRequest = "User %s sends %s request to %s"
+var SocialGraphAcceptRequest = "User %s accept follow request from %s"
+var SocialGraphDeclineRequest = "User %s decline follow request from %s"
 
 func GenerateLog(msg string, logs []string, logType, sourceType, sourceName, ip string) ([]string, error) {
 	event := Event{

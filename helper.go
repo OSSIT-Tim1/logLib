@@ -11,9 +11,11 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// const maxMemory = 1024 * 1024 // boundary of 1MB for logfile
-const folderPath = "/data/log/"
-const maxAge = 5
+const (
+	folderPath = "/data/log/"
+	maxAge = 5
+	maxMemory = 10 //1024 * 1024 // boundary of 1MB for logfile
+)
 
 /*
 The saveLog function takes two parameters (forwarded logs and Event object with parameters)
@@ -66,7 +68,7 @@ func saveLog(logs []string, event *Event) ([]string, error) {
 		logger.WithFields(standardFields).Info(event.Message)
 	}
 
-	if len(sliceWriter.logs) > 10 { // should be replaced with maxMemory
+	if len(sliceWriter.logs) > maxMemory { // should be replaced with maxMemory
 		res, err := flushLogs(logger, sliceWriter.logs)
 		if err != nil {
 			return sliceWriter.logs, err
