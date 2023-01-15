@@ -13,8 +13,8 @@ import (
 
 const (
 	folderPath = "/data/log/"
-	maxAge = 5
-	maxMemory = 10 //1024 * 1024 // boundary of 1MB for logfile
+	maxAge = 5 
+	maxMemory = 5 //1024 * 1024 // boundary of 1MB for logfile
 )
 
 /*
