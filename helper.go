@@ -13,8 +13,8 @@ import (
 
 const (
 	folderPath = "/data/log/"
-	maxAge = 5 
-	maxMemory = 5 //1024 * 1024 // boundary of 1MB for logfile
+	maxAge     = 5
+	maxMemory  = 5 //1024 * 1024 // boundary of 1MB for logfile
 )
 
 /*
@@ -26,12 +26,14 @@ If logs are under boundary, they are going to be returned with new inserted log.
 
 func saveLog(logs []string, event *Event) ([]string, error) {
 
+	/*  This block of code delete all log files older then "maxAge" (days or minutes for the upper limit)
 	ch := make(chan error)
 	go func() { ch <- checkOutOfDateFiles() }()
 	err := <-ch
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+	*/
 
 	logger := logrus.New()
 	sliceWriter := &SliceWriter{
